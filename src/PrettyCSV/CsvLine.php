@@ -95,10 +95,10 @@ class CsvLine extends ArrayObject {
 
     /**
      * @param $key
-     * @return mixed
+     * @return mixed|null
      * @throws ParserException
      */
-    public function offsetGet($key): mixed {
+    public function offsetGet($key) {
         return $this->getField($key);
     }
 

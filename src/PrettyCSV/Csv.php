@@ -46,6 +46,11 @@ class Csv implements Iterator {
     protected int $currentRow = 0;
 
     /**
+     * @var int
+     */
+    protected int $dataStartPoint;
+
+    /**
      * @var HeaderColumnInterface[]
      */
     protected array $headers = [];
@@ -70,7 +75,7 @@ class Csv implements Iterator {
         string $separator = ',',
         string $enclosure = '"',
         string $escape = '\\',
-        int $length = 0
+        int $length = 1000
     ) {
 
         $this->fp = fopen($file, 'r');
@@ -79,9 +84,9 @@ class Csv implements Iterator {
         $this->escape = $escape;
         $this->length = $length;
 
-        $this->next();
-
         if(!is_null($headers)) {
+
+            $this->next();
 
             $this->hasHeader = true;
             $expectedColumns = [];
@@ -108,9 +113,9 @@ class Csv implements Iterator {
                 throw new ParserException("Expected columns: " . implode(', ', $expectedColumns), $this->currentRow);
             }
 
-            $this->next();
-
         }
+
+        $this->dataStartPoint = ftell($this->fp);
 
     }
 
@@ -142,8 +147,9 @@ class Csv implements Iterator {
      * @return void
      */
     public function rewind() {
-        rewind($this->fp);
-        $this->currentRow = 1;
+        fseek($this->fp, $this->dataStartPoint, SEEK_SET);
+        $this->currentRow = 0;
+        $this->next();
     }
 
     /**
