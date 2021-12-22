@@ -1,0 +1,28 @@
+{
+  "name": "andreabont/prettycsv",
+  "description": "PrettyCSV Library",
+  "keywords": ["csv"],
+  "homepage": "https://github.com/Andreabont/PrettyCSV",
+  "type": "library",
+  "license": "LGPL-2.1-only",
+  "authors": [
+    {
+      "name": "Andrea Bontempi"
+    }
+  ],
+  "require": {
+    "php": ">=8.0"
+  },
+  "require-dev": {
+
+  },
+  "suggest": {
+
+  },
+  "autoload": {
+    "psr-4": {"PrettyCSV\\": "src/PrettyCSV"}
+  },
+  "autoload-dev": {
+    "psr-4": {"PrettyCSV\\": "tests/PrettyCSV"}
+  }
+}
