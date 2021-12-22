@@ -1,6 +1,7 @@
 {
   "name": "andreabont/prettycsv",
   "description": "PrettyCSV Library",
+  "version": "1.0",
   "keywords": ["csv"],
   "homepage": "https://github.com/Andreabont/PrettyCSV",
   "type": "library",
