@@ -7,7 +7,7 @@ namespace PrettyCSV\Parsers;
 use PrettyCSV\Interfaces\TypeParserInterface;
 use DateTime;
 
-class DateTimeParser implements TypeParserInterface {
+class ListParser implements TypeParserInterface {
 
     /**
      * @var string

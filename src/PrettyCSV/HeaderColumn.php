@@ -30,6 +30,21 @@ class HeaderColumn implements HeaderColumnInterface {
     private ?TypeParserInterface $parser;
 
     /**
+     * @param string $name
+     * @param bool $is_required
+     * @param TypeParserInterface|null $parser
+     */
+    public function __construct(
+        string $name,
+        bool $is_required = false,
+        ?TypeParserInterface $parser = null
+    ) {
+        $this->name = $name;
+        $this->is_required = $is_required;
+        $this->parser = $parser;
+    }
+
+    /**
      * @inheritDoc
      */
     public function setName(string $name): HeaderColumnInterface {

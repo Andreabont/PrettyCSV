@@ -107,11 +107,11 @@ class Csv implements Iterator {
             $csvColumnIndex = 0;
             foreach (str_getcsv($this->currentLine, $this->separator, $this->enclosure, $this->escape) as $csvColumnName) {
                 if(!array_key_exists($csvColumnName, $this->headerList)) {
-                    $this->headerList[$csvColumnName] = (new HeaderColumn())->setName($csvColumnName);
+                    $this->headerList[$csvColumnName] = new HeaderColumn($csvColumnName);
                 }
                 $this->headerList[$csvColumnName]->setIndex($csvColumnIndex);
-                if(array_key_exists($csvColumnName, $expectedColumns)) {
-                    unset($expectedColumns[$csvColumnName]);
+                if(in_array($csvColumnName, $expectedColumns)) {
+                    unset($expectedColumns[array_search($csvColumnName, $expectedColumns)]);
                 }
                 $csvColumnIndex++;
             }
@@ -134,9 +134,9 @@ class Csv implements Iterator {
     }
 
     /**
-     * @return array|CsvLine
+     * @return mixed
      */
-    public function current() {
+    public function current() : mixed {
         $line = str_getcsv($this->currentLine, $this->separator, $this->enclosure, $this->escape);
         if(!$this->hasHeader) return $line;
         return new CsvLine($line, $this->currentRow, $this->headerList);
@@ -152,7 +152,7 @@ class Csv implements Iterator {
     /**
      * @return void
      */
-    public function next() {
+    public function next() : void {
         $this->currentLine = fgets($this->fp, $this->length);
         $this->currentRow++;
     }
@@ -160,7 +160,7 @@ class Csv implements Iterator {
     /**
      * @return void
      */
-    public function rewind() {
+    public function rewind() : void {
         fseek($this->fp, $this->dataStartPoint, SEEK_SET);
         $this->currentRow = 0;
         $this->next();

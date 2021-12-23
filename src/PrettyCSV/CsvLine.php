@@ -9,6 +9,7 @@ use PrettyCSV\Interfaces\TypeParserInterface;
 use PrettyCSV\Parsers\ParserException;
 use ArrayObject;
 use ArrayIterator;
+use Iterator;
 
 class CsvLine extends ArrayObject {
 
@@ -25,7 +26,7 @@ class CsvLine extends ArrayObject {
     /**
      * @var HeaderColumnInterface[]
      */
-    protected array $headers = [];
+    protected array $headerList = [];
 
     /**
      * @var array
@@ -35,38 +36,38 @@ class CsvLine extends ArrayObject {
     /**
      * @param array $currentLine
      * @param int $currentRow
-     * @param array $headers
+     * @param array $headerList
      */
     public function __construct(
         array $currentLine,
         int $currentRow,
-        array $headers
+        array $headerList
     ){
         $this->currentLine = $currentLine;
         $this->currentRow = $currentRow;
-        $this->headers = $headers;
+        $this->headerList = $headerList;
     }
 
     /**
      * @param string $name
      * @return bool
      */
-    private function existsField(string $name) {
-        return array_key_exists($name, $this->headers) && !is_null($this->headers[$name]->getIndex());
+    private function existsField(string $name): bool {
+        return array_key_exists($name, $this->headerList) && !is_null($this->headerList[$name]->getIndex());
     }
 
     /**
      * @param string $name
-     * @return mixed|null
+     * @return mixed
      * @throws ParserException
      */
-    private function getField(string $name) {
+    private function getField(string $name): mixed {
         if(!$this->existsField($name)) {
             throw new ParserException("Field '{$name}' not found", $this->currentRow);
         }
-        $index = $this->headers[$name]->getIndex();
+        $index = $this->headerList[$name]->getIndex();
         /** @var TypeParserInterface $parser */
-        $parser = $this->headers[$name]->getParser();
+        $parser = $this->headerList[$name]->getParser();
         if(!array_key_exists($name, $this->parsedDataCache)) {
             if(!array_key_exists($index, $this->currentLine)) return null;
             $data = $this->currentLine[$index];
@@ -95,10 +96,10 @@ class CsvLine extends ArrayObject {
 
     /**
      * @param $key
-     * @return mixed|null
+     * @return mixed
      * @throws ParserException
      */
-    public function offsetGet($key) {
+    public function offsetGet($key) : mixed {
         return $this->getField($key);
     }
 
@@ -116,8 +117,8 @@ class CsvLine extends ArrayObject {
      */
     public function getArrayCopy(): array {
         $result = [];
-        foreach ($this->headers as $name => $header) {
-            if (!is_null($header->getIndex())) {
+        foreach ($this->headerList as $name => $header) {
+            if (is_null($header->getIndex())) {
                 continue;
             }
             $result[$name] = $this->getField($name);
@@ -126,10 +127,10 @@ class CsvLine extends ArrayObject {
     }
 
     /**
-     * @return ArrayIterator
+     * @return Iterator
      * @throws ParserException
      */
-    public function getIterator() {
+    public function getIterator() : Iterator {
         return new ArrayIterator($this->getArrayCopy(), $this->getFlags());
     }
 
@@ -137,7 +138,7 @@ class CsvLine extends ArrayObject {
      * @return array
      * @throws ParserException
      */
-    public function __debugInfo() {
+    public function __debugInfo() : array {
         return $this->getArrayCopy();
     }
 
