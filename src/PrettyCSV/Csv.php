@@ -53,7 +53,7 @@ class Csv implements Iterator {
     /**
      * @var HeaderColumnInterface[]
      */
-    protected array $headers = [];
+    protected array $headerList = [];
 
     /**
      * @var bool
@@ -62,7 +62,7 @@ class Csv implements Iterator {
 
     /**
      * @param string $file
-     * @param array|null $headers
+     * @param array|bool $header
      * @param string $separator
      * @param string $enclosure
      * @param string $escape
@@ -70,12 +70,12 @@ class Csv implements Iterator {
      * @throws ParserException
      */
     public function __construct(
-        string $file,
-        array $headers = null,
-        string $separator = ',',
-        string $enclosure = '"',
-        string $escape = '\\',
-        int $length = 1000
+        string     $file,
+        array|bool $header = false,
+        string     $separator = ',',
+        string     $enclosure = '"',
+        string     $escape = '\\',
+        int        $length = 1000
     ) {
 
         $this->fp = fopen($file, 'r');
@@ -83,29 +83,36 @@ class Csv implements Iterator {
         $this->enclosure = $enclosure;
         $this->escape = $escape;
         $this->length = $length;
+        $this->hasHeader = is_array($header) || $header;
 
-        if(!is_null($headers)) {
+        if($this->hasHeader) {
 
             $this->next();
 
-            $this->hasHeader = true;
-            $expectedColumns = [];
-
-            /** @var HeaderColumnInterface $header */
-            foreach ($headers as $header) {
-                $this->headers[$header->getName()] = $header;
-                if($header->getIsRequired()) $expectedColumns[] = $header->getName();
+            if(!$this->valid()) {
+                throw new ParserException("Header non found", $this->currentRow);
             }
 
-            $line = str_getcsv($this->currentLine, $this->separator, $this->enclosure, $this->escape);
-            $csvColumnIndex = 0;
+            $expectedColumns = [];
 
-            foreach ($line as $csvColumnName) {
-                if(!array_key_exists($csvColumnName, $this->headers)) {
-                    $this->headers[$csvColumnName] = (new HeaderColumn())->setName($csvColumnName);
+            if(is_array($header)) {
+                /** @var HeaderColumnInterface $headerColumn */
+                foreach ($header as $headerColumn) {
+                    if(!($headerColumn instanceof HeaderColumnInterface)) continue;
+                    $this->headerList[$headerColumn->getName()] = $headerColumn;
+                    if($headerColumn->getIsRequired()) $expectedColumns[] = $headerColumn->getName();
                 }
-                $this->headers[$csvColumnName]->setIndex($csvColumnIndex);
-                unset($expectedColumns[$csvColumnName]);
+            }
+
+            $csvColumnIndex = 0;
+            foreach (str_getcsv($this->currentLine, $this->separator, $this->enclosure, $this->escape) as $csvColumnName) {
+                if(!array_key_exists($csvColumnName, $this->headerList)) {
+                    $this->headerList[$csvColumnName] = (new HeaderColumn())->setName($csvColumnName);
+                }
+                $this->headerList[$csvColumnName]->setIndex($csvColumnIndex);
+                if(array_key_exists($csvColumnName, $expectedColumns)) {
+                    unset($expectedColumns[$csvColumnName]);
+                }
                 $csvColumnIndex++;
             }
 
@@ -120,12 +127,19 @@ class Csv implements Iterator {
     }
 
     /**
+     * Destructor
+     */
+    function __destruct() {
+        fclose($this->fp);
+    }
+
+    /**
      * @return array|CsvLine
      */
     public function current() {
         $line = str_getcsv($this->currentLine, $this->separator, $this->enclosure, $this->escape);
         if(!$this->hasHeader) return $line;
-        return new CsvLine($line, $this->currentRow, $this->headers);
+        return new CsvLine($line, $this->currentRow, $this->headerList);
     }
 
     /**

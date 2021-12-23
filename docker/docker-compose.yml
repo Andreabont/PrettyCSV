@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  prettycsv:
+    image: prettycsv:0.0.3
+    build: .
+    volumes:
+      - ./../:/home/prettycsv
