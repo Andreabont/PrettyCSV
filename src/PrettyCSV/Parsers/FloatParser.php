@@ -24,10 +24,10 @@ class FloatParser implements TypeParserInterface {
 
     /**
      * @param string $data
-     * @return float
+     * @return float|null
      * @throws ParserException
      */
-    public function parse(string $data): float {
+    public function parse(string $data): ?float {
         $return = filter_var($data, FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE);
         if(is_null($return) && $this->is_strict) throw new ParserException("Cannot parse '{$data}' as float.");
         return $return;

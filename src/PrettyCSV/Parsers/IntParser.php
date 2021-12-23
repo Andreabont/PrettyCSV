@@ -24,10 +24,10 @@ class IntParser implements TypeParserInterface {
 
     /**
      * @param string $data
-     * @return int
+     * @return int|null
      * @throws ParserException
      */
-    public function parse(string $data): int {
+    public function parse(string $data): ?int {
         $return = filter_var($data, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
         if(is_null($return) && $this->is_strict) throw new ParserException("Cannot parse '{$data}' as int.");
         return $return;

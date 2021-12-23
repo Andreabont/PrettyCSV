@@ -24,10 +24,10 @@ class BoolParser implements TypeParserInterface {
 
     /**
      * @param string $data
-     * @return bool
+     * @return bool|null
      * @throws ParserException
      */
-     public function parse(string $data): bool {
+     public function parse(string $data): ?bool {
          $return = filter_var($data, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
          if(is_null($return) && $this->is_strict) throw new ParserException("Cannot parse '{$data}' as bool.");
          return $return;

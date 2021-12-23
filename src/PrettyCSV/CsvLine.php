@@ -49,19 +49,19 @@ class CsvLine extends ArrayObject {
     }
 
     /**
-     * @param string $name
+     * @param string|int $name
      * @return bool
      */
-    private function existsField(string $name): bool {
+    private function existsField(string|int $name): bool {
         return array_key_exists($name, $this->headerList) && !is_null($this->headerList[$name]->getIndex());
     }
 
     /**
-     * @param string $name
+     * @param string|int $name
      * @return mixed
      * @throws ParserException
      */
-    private function getField(string $name): mixed {
+    private function getField(string|int $name): mixed {
         if(!$this->existsField($name)) {
             throw new ParserException("Field '{$name}' not found", $this->currentRow);
         }
